@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>图片上传</title>
+    <style>
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .image-container {
+            position: relative;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .upload-form {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-form">
+        <h2>上传新图片</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">上传</button>
+        </form>
+    </div>
+
+    <div class="image-grid">
+        {% for image in images %}
+            <div class="image-container">
+                <img src="{{ image.url }}" alt="Uploaded image">
+                <button class="delete-btn" onclick="deleteImage('{{ image.name }}')">删除</button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function deleteImage(filename) {
+            if (confirm('确定要删除这张图片吗？')) {
+                fetch(`/delete/${filename}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('删除失败');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
